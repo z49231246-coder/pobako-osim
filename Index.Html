@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login & Input Pelanggaran - POBAKO OSIM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card-custom {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+        }
+        .form-control, .form-select {
+            background-color: #0f172a;
+            border-color: #334155;
+            color: #f8fafc;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #0f172a;
+            color: #f8fafc;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+        }
+        .table-custom {
+            color: #f8fafc;
+            vertical-align: middle;
+        }
+        .table-custom th {
+            background-color: #334155 !important;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+        .table-custom td {
+            border-color: #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <!-- 1. BAGIAN HALAMAN LOGIN -->
+                <div id="loginCard" class="card card-custom shadow-lg p-4 mx-auto" style="max-width: 500px;">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-primary"><i class="bi bi-shield-lock-fill me-2"></i>LOGIN PETUGAS OSIM</h3>
+                        <p class="text-muted small">Masukkan Username dan Password sesuai SK Kepengurusan</p>
+                    </div>
+
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-light">Username</label>
+                            <input type="text" class="form-control" id="usernameInput" placeholder="Contoh: ketua, sekbid1.1" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-light">Password</label>
+                            <input type="password" class="form-control" id="passwordInput" placeholder="Masukkan password..." required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> MASUK SISTEM
+                        </button>
+                    </form>
+                    <div id="loginError" class="text-danger text-center mt-3 small"></div>
+                </div>
+
+                <!-- 2. BAGIAN UTAMA SETELAH LOGIN (Form Input & Tabel Rekap) -->
+                <div id="mainAppCard" class="d-none">
+                    
+                    <!-- Header Info Petugas -->
+                    <div class="card card-custom shadow p-4 mb-4 d-flex flex-row justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold text-primary m-0"><i class="bi bi-journal-text me-2"></i>Dashboard Pelaporan POBAKO</h4>
+                            <p class="text-muted m-0 small">Petugas Bertugas: <span id="namaPetugasLogin" class="text-warning fw-bold"></span></p>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm px-3" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </button>
+                    </div>
+
+                    <!-- Form Input -->
+                    <div class="card card-custom shadow-lg p-4 mb-4">
+                        <h5 class="fw-bold text-success mb-3"><i class="bi bi-plus-circle-fill me-2"></i>Input Pelanggaran Baru</h5>
+                        <form id="inputForm">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-semibold text-light">Tanggal Kejadian</label>
+                                    <input type="date" class="form-control" id="tanggal" required>
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label class="form-label fw-semibold text-light">Nama Santri yang Melanggar & Kelas</label>
+                                    <input class="form-control" list="listSantri" id="namaSantri" placeholder="Ketik atau pilih nama santri..." required>
+                                    <datalist id="listSantri"></datalist>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold text-light">Kata yang Diucapkan</label>
+                                <input type="text" class="form-control" id="kataUcap" placeholder="Contoh: Kata-kata kotor / tidak sopan..." required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 py-2 fw-semibold shadow">
+                                <i class="bi bi-send-fill me-1"></i> KIRIM LAPORAN
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Tabel Rekapitulasi Riwayat Input -->
+                    <div class="card card-custom shadow-lg p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-info m-0"><i class="bi bi-table me-2"></i>Rekapitulasi Riwayat Pelanggaran</h5>
+                            <span class="badge bg-secondary px-3 py-2" id="badgeTotalRekap">Total: 0 Laporan</span>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-custom table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="15%">Tanggal</th>
+                                        <th width="30%">Nama Santri</th>
+                                        <th width="25%">Kata yang Diucapkan</th>
+                                        <th width="25%">Petugas Penginput</th>
+                                        <th width="5%" class="text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelRekapBody">
+                                    <tr><td colspan="5" class="text-center text-muted py-4">Belum ada riwayat pelanggaran.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database Akun Pengurus OSIM berdasarkan PDF
+        const databaseAkun = [
+            { user: "ketua", pass: "ketuaosim2026", nama: "Muhammad Iklil Azam (Ketua)" },
+            { user: "wakil", pass: "wakilosim2026", nama: "Firstanty Afrilia Firza Wahyudi (Wakil)" },
+            { user: "sekretaris", pass: "sekretarisosim2026", nama: "Muhammad Abidzar All Gifari (Sekretaris)" },
+            { user: "bendahara", pass: "bendaharaosim2026", nama: "Syafillya Dwi Queen Netta Antiyono (Bendahara)" },
+            { user: "sekbid1.1", pass: "sekbid1.1osim2026", nama: "Miftachul Huda (Sekbid 1)" },
+            { user: "sekbid1.2", pass: "sekbid1.2osim2026", nama: "Islam Madinna Putri Nanda (Sekbid 1)" },
+            { user: "sekbid2.1", pass: "sekbid 2.1osim2026", nama: "Wahid Arya Fuaziantoro (Sekbid 2)" },
+            { user: "sekbid2.2", pass: "sekbid2.2osim2026", nama: "Ahmad Adlan Muhibbal Ahadi (Sekbid 2)" },
+            { user: "sekbid3.1", pass: "sekbid3.1osim2026", nama: "Ibra Nahdan Mufadillah (Sekbid 3)" },
+            { user: "sekbid3.2", pass: "sekbid3.2osim2026", nama: "Siti Aulia Munawwaroh (Sekbid 3)" },
+            { user: "sekbid4.1", pass: "sekbid4.1osim2026", nama: "Muhammad Abid Aqila Pranaja (Sekbid 4)" },
+            { user: "sekbid4.2", pass: "sekbid4.2osim2026", nama: "Raisha Kenar Supandji (Sekbid 4)" },
+            { user: "sekbid5.1", pass: "sekbid 5.1osim2026", nama: "Dovian Khoirul Rizky (Sekbid 5)" },
+            { user: "sekbid5.2", pass: "sekbid5.2osim2026", nama: "Bunga Elok Azkiah Al Mahbuby (Sekbid 5)" },
+            { user: "sekbid6.1", pass: "sekbid6.10sim2026", nama: "Muhammad Rizki Mubaroq (Sekbid 6)" },
+            { user: "sekbid6.2", pass: "sekbid6.20sim2026", nama: "Bilgis Tsania Wulandari (Sekbid 6)" },
+            { user: "sekbid7.1", pass: "sekbid 7.1osim2026", nama: "Arkan Nur Ali Yazid (Sekbid 7)" },
+            { user: "sekbid7.2", pass: "sekbid 7.2osim2026", nama: "Rafi Afif Nawawi (Sekbid 7)" },
+            { user: "sekbid8.1", pass: "sekbid 8.1osim2026", nama: "Zhakila Hasna Assyafa (Sekbid 8)" },
+            { user: "sekbid8.2", pass: "sekbid 8.20sim2026", nama: "Azriyah Octaviana Hamda (Sekbid 8)" },
+            { user: "sekbid9.1", pass: "sekbid 9.1osim2026", nama: "Alana Gabriel Davinaldo (Sekbid 9)" },
+            { user: "sekbid9.2", pass: "sekbid 9.2osim2026", nama: "Nona Lathifatus Syifa (Sekbid 9)" },
+            { user: "sekbid10.1", pass: "sekbid 10.1osim2026", nama: "Meysa Dwi Kirana (Sekbid 10)" },
+            { user: "sekbid10.2", pass: "sekbid10.20sim2026", nama: "Khaizarani Suci Nurmala (Sekbid 10)" }
+        ];
+
+        // Daftar Nama Santri
+        const dataSiswaPDF = [
+            "Ahnaf Rais Abrullah Furqon (Kelas 7)", "Malik Bahtiar Artanto (Kelas 7)", "Ach. Ilham Mubarok (Kelas 7)", "Muhamad Putra Pratama (Kelas 7)", "Keanu Nafasat Artanabil (Kelas 7)", "Reyhan Alfirdausi (Kelas 7)", "Ahmad Zaky Firdaus (Kelas 7)", "Muhammad Rizaqi Alviano (Kelas 7)", "Ahmad Zainur Roziqin (Kelas 7)", "Ahmad Zidan Al Azzam (Kelas 7)", 
+            "Revano Dzakiy Naufal Pratama (Kelas 7)", "Muhammad Azharul Fathin Mubarok (Kelas 7)", "Ahmad Robid Aziz Arrofiqi (Kelas 7)", "Muhamad Akbar Maulana (Kelas 7)", "Yuslam (Kelas 7)", "Daffa Ibnu Hafidz (Kelas 7)", "Muhamad Putra Verdyansyah (Kelas 7)", "Muhammad Kevin Syah Putra (Kelas 7)", "Aqro' Nabil Rofi'l (Kelas 7)", "Abid Aqila Pranaja (Kelas 7)", 
+            "Muhammad Abdur Rohim (Kelas 7)", "Vais Hidayatullah Wicaksono (Kelas 7)", "Afifur Rohman (Kelas 7)", "Ashfaq Firaz Alby (Kelas 7)", "Kevin Junio Ardiansyah (Kelas 7)", "M.Rizky Januarif Pratama (Kelas 7)", "Ziltum Azka Ramadhan (Kelas 7)", "Faras Nasyeh Fatheh Mubarak (Kelas 7)", "Alvian Aditya Pratama (Kelas 7)", "Muhammad Wildan Maulana (Kelas 7)", 
+            "Ahmad Nabil Maulana (Kelas 7)", "Cheesta Nail Kayana (Kelas 7)", "Auffaro Faid Muhammad (Kelas 7)", "Imam Ariel Al Farizi (Kelas 7)", "M. Gavien Tazil Alvarobie (Kelas 7)", "Muhammad Ramdhan Eka Waluyo (Kelas 7)", "Dwi Farrellino Adhie Firmansyah (Kelas 7)", "Mochammad Nadzrullah (Kelas 7)", "Muhammad Hafidzurriski Firmansyah (Kelas 7)", "Adly Fairuz Akasyah (Kelas 7)", 
+            "Narendra Kamil (Kelas 7)", "Ayubi Harya Nugraha (Kelas 7)", "Muhammad Irsad Al Hakim (Kelas 7)", "Alvaro Iqbal Putra Cahyana (Kelas 7)", "Adhyasta Pradipta Mahanipuna (Kelas 7)", "Irsyad El Ibad (Kelas 7)", "Muhammad Rafka Al Zibran (Kelas 7)", "Muhammad Arthur Joseph Ibrahim (Kelas 7)", "Tiara Azizah (Kelas 7)", "Aisyah Maulana Aqilah (Kelas 7)", 
+            "Diana Putri Kahfi Maulidyah (Kelas 7)", "Arinis Syifa Kamal (Kelas 7)", "Elmira Dipta Azzahra (Kelas 7)", "Faizia Khanza Hibatillah (Kelas 7)", "Siti Syahrina Syifa (Kelas 7)", "Keyra Nayla Fairuz Az-Zahra (Kelas 7)", "Fitriyah Humairo Agustin (Kelas 7)", "Emira Najwana (Kelas 7)", "Nur Alya Zahra (Kelas 7)", "Yumna Zahratil Ilmi (Kelas 7)", 
+            "Adelia Ananda Fajri (Kelas 7)", "Nailatus Syfa (Kelas 7)", "Danish Afika Humaira (Kelas 7)", "Zerina Rosadi (Kelas 7)", "Mufida Syifa Fauziah (Kelas 7)", "Kayla Septia Irina Putri (Kelas 7)", "Syifa Azzahra Oktaviani (Kelas 7)", "Nafisa (Kelas 7)", "Aulia Izzatun Nisa' (Kelas 7)", "Alin Indriani (Kelas 7)", 
+            "Marsya Aqilah Putri (Kelas 7)", "Talita Hasna Humaira (Kelas 7)", "Ainara Sofwatul Muqsitu (Kelas 7)", "Ainnor Rohmah Efendi (Kelas 7)", "Shafa Habibahtul Maghfiroh (Kelas 7)", "Ufaira Putri Ramadhani (Kelas 7)", "Dzakira Talita Sakhi (Kelas 7)", "Islam Madinna Putri Nanda (Kelas 7)", "Baiq Janis Mentari (Kelas 7)", "Bilqis Nayla Habibah (Kelas 7)", 
+            "Awliya Ramadhani Azzahra (Kelas 7)", "Chindy Affrilia Putri (Kelas 7)", "Azahra Miysela Risma (Kelas 7)", "Hilya Zahirah Prasetya (Kelas 7)", "Khansa Lathifa Sakhi (Kelas 7)", "Atika Zahra Ratifa (Kelas 7)", "Zahra Raissa Hardiyanti (Kelas 7)", "Adinda Raisa Maulidya (Kelas 7)", "Agista Malva Aurelia (Kelas 7)", "Bilqis Dzakia Arifin (Kelas 7)", 
+            "Jihan Thalita Anggun (Kelas 7)", "Nayla Salsabila (Kelas 7)", "Adelia Mughni Turrofi'l (Kelas 7)", "Mardhatillah Hafizhatul Choir (Kelas 7)", "Putri Haliannur Lestari (Kelas 7)", "Akira Neysa Lugianto (Kelas 7)", "Azmi Talitha Zyla Azzalfa (Kelas 7)", "Mauliddyyah Nur Ainni (Kelas 7)", "Farhana Sovia Salsabilla Soleh (Kelas 7)", "Zainina Kanza Karomiyah (Kelas 7)", 
+            "Amelia Kharimatul Ma'Rifah (Kelas 7)", "Fazera Dian Eka Rahayu (Kelas 7)", "Bunga Elok Azkiah Al Mahbuby (Kelas 7)", "Uswatun Hasanah (Kelas 7)", "Putri Adibah Khumairoh (Kelas 7)", "Talitha Verda Zahirah (Kelas 7)", "Azzahra Aprilia Fatoni (Kelas 7)", "Aura Cika Sherindita (Kelas 7)", "Hilda Az-Zahra (Kelas 7)", 
+            "Ameera Qaireen Sofia (Kelas 7)", "Husna Khoirun Nisa (Kelas 7)", "Bella Oktaviana Esa Putri (Kelas 7)", "Adinda Kiani Khoirunnisa (Kelas 7)", "Dikha Putra Diyantoro (Kelas 8)", "Danang Rizki Muhammad Nugraha (Kelas 8)", "Muhammad Syafiq Febrian Pratama (Kelas 8)", "Ahmad Nur Syamil (Kelas 8)", "Mochamad Wildan Firmansyah (Kelas 8)", "M. Alfarizi Dwi Maulana (Kelas 8)", 
+            "Junieza Raditia Widio Prasetyo (Kelas 8)", "Muhammad Yanuar Mas'udi (Kelas 8)", "Fatiihul Ulum (Kelas 8)", "Rizky Farrel Aditya Erlangga (Kelas 8)", "Muhammad Abidzar Allgifari (Kelas 8)", "Ahmad Adlan Muhibbal Ahadi (Kelas 8)", "Mu'Adz Suvi Maulana (Kelas 8)", "Muhammad Abid Aqila Pranaja (Kelas 8)", "Muhammad Iklil Azam (Kelas 8)", "Wahid Arya Fauziantoro (Kelas 8)", 
+            "Miftachul Huda (Kelas 8)", "Ahmad Muzaqy (Kelas 8)", "Alana Gabriel Davinaldo (Kelas 8)", "Abdul Malik Syah Putra (Kelas 8)", "Ibra Nahdan Mufaddilah (Kelas 8)", "Arkan Nur Ali Yazid (Kelas 8)", "Muhammad Azka Pujiyanto (Kelas 8)", "Ahmad Yusron Fakhronil Musthofa (Kelas 8)", "Muhammad Fikri Abdul Qahhaar (Kelas 8)", "Adha Fahmi Al Kautsar (Kelas 8)", 
+            "Azka Al Barkah Permadi (Kelas 8)", "Affan Anwar Khairullah Ahmad (Kelas 8)", "Putra Vanessia Raysandi (Kelas 8)", "Muhammad Arya Tirta Adisyahbana (Kelas 8)", "Muhammad Akhdan Azizan (Kelas 8)", "Rafi Afif Nawawi (Kelas 8)", "Mochammad Fardan Agasa (Kelas 8)", "Al Fatih Asyafar (Kelas 8)", "Ahmad Daffa Alkhalifi (Kelas 8)", "Moch. Rafa Sadid Ikhwani (Kelas 8)", 
+            "Akbar Barokatul Ichwan (Kelas 8)", "Muhammad Rizki Mubaroq (Kelas 8)", "Ilham Ramadhani (Kelas 8)", "Dovian Khoirul Rizky (Kelas 8)", "Rayhan Aditya Zavier (Kelas 8)", "Muhammad Abdillah Hidayat (Kelas 8)", "Muhammad Alfin Zainuri (Kelas 8)", "Muhammad Ashfa Ilham (Kelas 8)", "Fathan Thoriqul Haqqi (Kelas 8)", "Zazkia Zahra Arrafah (Kelas 8)", 
+            "Laily Destiana Putri (Kelas 8)", "Erin Yushi Rahma (Kelas 8)", "Amira Makaillah Fakhira (Kelas 8)", "Azaria Auryn Rahma (Kelas 8)", "Septya Aulia Mossa (Kelas 8)", "Zhakila Hasna Assyfa (Kelas 8)", "Nazila Hasna As'Ary (Kelas 8)", "Eska Farah Qothrunnada (Kelas 8)", "Keysya Eka Anastasya (Kelas 8)", "Dinda Silfia Putri (Kelas 8)", 
+            "Raisha Kenar Aurelya Supandji (Kelas 8)", "Nur Aini Aulia (Kelas 8)", "Siti Aulia Munawaroh (Kelas 8)", "Nona Lathifatusyifa (Kelas 8)", "Bilqis Tsania Wulandari (Kelas 8)", "Andarista Himami Hafsawati (Kelas 8)", "Azriyah Octaviana Hamda (Kelas 8)", "Raisa Elsa Kinara (Kelas 8)", "Salva Rani Anggara Putri (Kelas 8)", "Firstanty Afrilia Firza Wahyudi (Kelas 8)", 
+            "Nayly Almira Davita (Kelas 8)", "Inez Aviola Amelia (Kelas 8)", "Callista Cahya Nasya Lathisa (Kelas 8)", "Titania Bebby Ayu Shakira Maharani (Kelas 8)", "Zuhrufil Wardah (Kelas 8)", "Syafrillya Dwi Quin Netta Antiyono (Kelas 8)", "Avivatus Syarifah (Kelas 8)", "Mumtaza Maulidiya Dwi Putri Ayubi (Kelas 8)", "Dinda Putri Febrianingtiyas (Kelas 8)", "Dwi Putri Ayu Maulidia (Kelas 8)", 
+            "Athaila Putri Zhaliha (Kelas 8)", "Ifty Ellyana (Kelas 8)", "Crisila Alqarana Bilqis (Kelas 8)", "Aisyah Jazilah Putri Ramanda (Kelas 8)", "Khaizarani Suci Nurmala (Kelas 8)", "Sa'ldah Fatimah Li Izzatillah Amyn (Kelas 8)", "Natasya Eka Anindita (Kelas 8)", "Najma Zhafira Zain (Kelas 8)", "Nayara Khaira Wilda (Kelas 8)", "Azizah Firdaus (Kelas 8)", 
+            "Zahra Alifah Putri Prastian (Kelas 8)", "Mahira Hasna Yudho Kamila (Kelas 8)", "Achmad Askhabul Firdaus (Kelas 9)", "Wisnu Leonugraha (Kelas 9)", "Aditya Fadhil Purwanto (Kelas 9)", "Muhammad Rizki (Kelas 9)", "Ardiansyah Dwi Maulana (Kelas 9)", "Fabio Akmal Fadhillah (Kelas 9)", "Abdul Haris Kurniawan (Kelas 9)", "Adam Pratama (Kelas 9)", 
+            "Febrian Maulana Riyono (Kelas 9)", "Fatkhur Rozi (Kelas 9)", "Muhammad Raihan Ramadhan (Kelas 9)", "Ahmad Hizib Hirzul Jausyan (Kelas 9)", "Muazzam Fatah Ramdani (Kelas 9)", "Muhammad Nico Febrian (Kelas 9)", "Deni Abdullah Firdaus (Kelas 9)", "Tsabituhhasmi Iqbar Syazali (Kelas 9)", "Arga Aditya Putra Alvando (Kelas 9)", "Asa Aydin Muhammad (Kelas 9)", 
+            "Reza Azhari Iswahyudi (Kelas 9)", "Ahmad Naufal Ibraril Hasan (Kelas 9)", "Naufal Aydin Azmi (Kelas 9)", "Miqdad Muhammad (Kelas 9)", "Muhammad Zamzam Abdi Jaelani (Kelas 9)", "Ahmad Hazkial Yusuf (Kelas 9)", "Firmansyah Zainul Alim (Kelas 9)", "M. Afwan Ayub (Kelas 9)", "David Nurimansyah (Kelas 9)", "Muhammad Ananda Fajariansyah (Kelas 9)", 
+            "Muhammad Akbar Rizky Pradana (Kelas 9)", "Azriel Ridho Akbar (Kelas 9)", "Muhammad Furqon (Kelas 9)", "Radyan Wrahatnala (Kelas 9)", "Hamdan Cahyo Ramdhanu (Kelas 9)", "Kenzo Ibrahim Zazuli (Kelas 9)", "Muchammad Wirajaya Revaliansyah (Kelas 9)", "M. Rafif Rajwa Rula (Kelas 9)", "Fahrul Najwan Azka (Kelas 9)", "Ahmad Jibran Efendi (Kelas 9)", 
+            "Jiwa Nadhirsyah Pratama (Kelas 9)", "Gemilang Fajar Alamsyah (Kelas 9)", "Muhammad Zulfa Khairul Hady (Kelas 9)", "Alif Edo Ryon (Kelas 9)", "Adam Abdul Rahman Kirom (Kelas 9)", "Achmad Nizzam Widiyanto (Kelas 9)", "Keanu Hadani Zidan (Kelas 9)", "Vihri Qurbillah (Kelas 9)", "Muhammad Azzam (Kelas 9)", "Jeffy Hanun Wiratama (Kelas 9)", 
+            "Ziven Jabbar Kustiawan (Kelas 9)", "Dzulfikar Ridho Riskayana (Kelas 9)", "Ahmad Ghozain Dikrullah (Kelas 9)", "Danar Abdul Aziz Al Azzam (Kelas 9)", "Radhin Firstya Risti (Kelas 9)", "Fallycia Regina Putri (Kelas 9)", "Malika Manha Zafira (Kelas 9)", "Safira Arum Mawarda (Kelas 9)", "Raya Qotrunnada (Kelas 9)", "Usfiana Dwi Andini (Kelas 9)", "Yasmin Ih Dania Az Zuhroh (Kelas 9)", "Chelsie Maydica (Kelas 9)", "Nadya Eka Ayu Priyanti (Kelas 9)", "Ardista Putri Maulidia (Kelas 9)", "Vega Rizky Zahra (Kelas 9)", "Sheliyana Putri (Kelas 9)", "Aulia Insani Putri (Kelas 9)", "Aprillia Hafizzah Nor Airin (Kelas 9)", "Hasna Nadhifa Almalikah (Kelas 9)", "Aliffia Almaeera Shaqeena (Kelas 9)", "Naivesya Asyilah Putri (Kelas 9)", "Faisa Ajeng Pratiwi (Kelas 9)", "Afiah Hapsari Zahra Hendriono (Kelas 9)", "Khansa Salsabila Hidayatullah (Kelas 9)", "Vindy Putri Amelia (Kelas 9)", "Fa'lqotul Zahrah (Kelas 9)", "Nafsi Zakia Asari (Kelas 9)", "Aprilia Bilqis Sekar Arum (Kelas 9)", "Rafa Azizah Niswah (Kelas 9)", "Kayla Ayu Wulandari (Kelas 9)", "Aghna Valeryqueen Purwanto (Kelas 9)", "Maela Adania Basri (Kelas 9)", "Ludfiyatul Hikmah (Kelas 9)", "Ananda Greta Septianingtyas (Kelas 9)", "Venezia Iftika Ramadani (Kelas 9)", "Zahratul Mufidah (Kelas 9)", "Nur Syifa Rahmaniah (Kelas 9)", "Serin Fitir Agustina (Kelas 9)", "Eky Aulia Sholeha (Kelas 9)", "Jihannur Nazira Farsya (Kelas 9)", "Adelia Novrida Dwi Anggraeni (Kelas 9)", "Nadia Miftahul Jannah (Kelas 9)", "Widayu Putri Novelinda (Kelas 9)", "Jihan Nurfara (Kelas 9)", "Farah Amelia Tri Safitri (Kelas 9)", "Inas Raisya Azzahra Rizkia (Kelas 9)", "Putri Dinda Kirana.", "Nafisya Azzahra Putri (Kelas 9)", "Wafi Maulid Dara Fathoni (Kelas 9)", "Naura Zahsyifa Aqila (Kelas 9)", "Nur Iflahatul Fitri (Kelas 9)", "Adelia Septa Verina Putri (Kelas 9)"
+        ];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const savedPetugas = sessionStorage.getItem('pobako_petugas');
+            if (savedPetugas) {
+                aktifkanApp(savedPetugas);
+            }
+
+            const datalist = document.getElementById('listSantri');
+            dataSiswaPDF.forEach(nama => {
+                const opt = document.createElement('option');
+                opt.value = nama;
+                datalist.appendChild(opt);
+            });
+            document.getElementById('tanggal').valueAsDate = new Date();
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userIn = document.getElementById('usernameInput').value.trim().toLowerCase();
+            const passIn = document.getElementById('passwordInput').value.trim();
+
+            const found = databaseAkun.find(acc => acc.user === userIn && acc.pass === passIn);
+
+            if (found) {
+                sessionStorage.setItem('pobako_petugas', found.nama);
+                aktifkanApp(found.nama);
+            } else {
+                document.getElementById('loginError').innerText = "Username atau Password salah!";
+            }
+        });
+
+        function aktifkanApp(nama) {
+            document.getElementById('loginCard').classList.add('d-none');
+            document.getElementById('mainAppCard').classList.remove('d-none');
+            document.getElementById('namaPetugasLogin').innerText = nama;
+            renderRekapTabel();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('pobako_petugas');
+            document.getElementById('mainAppCard').classList.add('d-none');
+            document.getElementById('loginCard').classList.remove('d-none');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').innerText = '';
+        }
+
+        document.getElementById('inputForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const newData = {
+                id: Date.now(),
+                tanggal: document.getElementById('tanggal').value,
+                nama: document.getElementById('namaSantri').value,
+                kata: document.getElementById('kataUcap').value,
+                petugas: sessionStorage.getItem('pobako_petugas') || "Petugas OSIM"
+            };
+
+            let dataList = JSON.parse(localStorage.getItem('pobako_data')) || [];
+            dataList.push(newData);
+            localStorage.setItem('pobako_data', JSON.stringify(dataList));
+
+            document.getElementById('namaSantri').value = '';
+            document.getElementById('kataUcap').value = '';
+            document.getElementById('tanggal').valueAsDate = new Date();
+
+            renderRekapTabel();
+            alert('Laporan berhasil disimpan dan dikirim ke Monitor TV!');
+        });
+
+        function renderRekapTabel() {
+            let dataList = JSON.parse(localStorage.getItem('pobako_data')) || [];
+            const tbody = document.getElementById('tabelRekapBody');
+            document.getElementById('badgeTotalRekap').innerText = `Total: ${dataList.length} Laporan`;
+            
+            tbody.innerHTML = '';
+
+            if (dataList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Belum ada riwayat pelanggaran.</td></tr>`;
+                return;
+            }
+
+            dataList.slice().reverse().forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.tanggal}</td>
+                        <td class="fw-semibold">${item.nama}</td>
+                        <td><span class="badge bg-dark text-warning border border-secondary px-2 py-1">"${item.kata}"</span></td>
+                        <td><small class="text-info"><i class="bi bi-person-badge me-1"></i>${item.petugas}</small></td>
+                        <td class="text-center">
+                            <button class="btn btn-outline-danger btn-sm" onclick="hapusLaporan(${item.id})" title="Hapus">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function hapusLaporan(id) {
+            if (confirm("Yakin ingin menghapus riwayat laporan ini?")) {
+                let dataList = JSON.parse(localStorage.getItem('pobako_data')) || [];
+                dataList = dataList.filter(item => item.id !== id);
+                localStorage.setItem('pobako_data', JSON.stringify(dataList));
+                renderRekapTabel();
+            }
+        }
+    </script>
+</body>
+</html>
